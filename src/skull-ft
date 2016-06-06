@@ -79,6 +79,9 @@ case_name=$2
 
 if [ ! -z "$SKULLFT_BINPATH" ]; then
     bin_path="$SKULLFT_BINPATH"
+else
+    bin_path=`dirname $0`
+    bin_path=`readlink -e $bin_path` # Get absolute path of the 'bin_path'
 fi
 
 # 2. Basic arg validation
