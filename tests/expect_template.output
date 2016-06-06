@@ -1,0 +1,16 @@
+[case1] start
+pre-run
+pre-run successful
+common test echo
+run
+run successful
+${prefix}/tests/common/ run successful
+${prefix}/tests/cases/case1 run successful
+${prefix}/tests/run/case1 run successful
+verify
+verify successful
+topdir: ${prefix}/tests
+commondir: ${prefix}/tests/common/
+casedir: ${prefix}/tests/cases/case1
+rundir: ${prefix}/tests/run/case1
+[case1] end
