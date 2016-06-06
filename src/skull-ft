@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# Global Variables
+case_path=""
+case_name=""
+bin_path=""
+
+# ============= Internal Functions ==============
+function usage()
+{
+    echo "Usage:"
+    echo " - skull-ft case_path [case_name]"
+}
+
+function runOneCase()
+{(
+    # 1. Enter case folder
+    local config="skull_ft_case.yml"
+    local topdir=`pwd`
+    local caseName=$1
+    local casedir="cases/$caseName"
+    local rundir=$topdir/run/$caseName
+    mkdir -p $rundir
+
+    cd "$casedir"
+    echo "[$caseName] start"
+
+    if [ ! -f "$config" ]; then
+        echo "Error: not found $config, skip this case"
+        return 0
+    fi
+
+    # 2. Run Case
+    $bin_path/skull-case-executor.py -t $topdir -n $caseName -c $config
+
+    echo "[$caseName] end"
+)}
+
+function runAllCases()
+{
+    ls -1 "cases" | while read caseName; do
+        if [ -z "$caseName" ]; then
+            echo "'case name' is empty, skip it"
+            continue
+        fi
+
+        if [ ! -d "cases/$caseName" ]; then
+            echo "case ["$caseName"] is not a folder, skip it"
+            continue
+        fi
+
+        runOneCase "$caseName"
+    done
+}
+
+function runCases()
+{
+    # 1. Enter case path
+    cd "$case_path"
+
+    # 2. Run all cases or one case
+    if [ -z "$case_name" ]; then
+        runAllCases
+    else
+        runOneCase "$case_name"
+    fi
+}
+
+# ============= main ==============
+# 1. Check args
+if [ $# = 0 ]; then
+    echo "Missing 'case path' arg"
+    usage
+    exit 1
+fi
+
+case_path=$1
+case_name=$2
+
+if [ ! -z "$SKULLFT_BINPATH" ]; then
+    bin_path="$SKULLFT_BINPATH"
+fi
+
+# 2. Basic arg validation
+if [ -z "$case_path" ]; then
+    echo "case path is empty, cannot run case"
+    exit 1
+fi
+
+if [ ! -d "$case_path" ]; then
+    echo "case path ["$case_path"] is not a folder, cannot run case"
+    exit 1
+fi
+
+# 3. Run Cases
+runCases

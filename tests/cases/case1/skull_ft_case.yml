@@ -1,0 +1,15 @@
+pre-run:
+    - echo "pre-run"
+    - echo "pre-run successful"
+    - ${COMMON}/test_echo.sh
+
+run:
+    - echo "run"
+    - echo "run successful"
+    - echo "${COMMON} run successful"
+    - echo "${CASE} run successful"
+    - echo "${RUN} run successful"
+
+verify:
+    - echo "verify"
+    - echo "verify successful"
