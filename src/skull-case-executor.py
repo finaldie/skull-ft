@@ -17,6 +17,7 @@ g_topdir = ""
 g_commondir = ""
 g_casedir = ""
 g_rundir = ""
+g_debug_enabled = False
 
 g_common_path_key = "${COMMON}"
 g_case_path_key = "${CASE}"
@@ -116,7 +117,7 @@ if __name__ == "__main__":
 
     try:
         # 1. parse the args
-        opts, args = getopt.getopt(sys.argv[1:], 'c:t:n:')
+        opts, args = getopt.getopt(sys.argv[1:], 'c:t:n:D')
 
         for op, value in opts:
             if op == "-c":
@@ -125,14 +126,18 @@ if __name__ == "__main__":
                 g_topdir = value
             elif op == "-n":
                 g_case_name = value
+            elif op == "-D":
+                g_debug_enabled = True
 
         g_casedir = g_topdir + "/cases/" + g_case_name
         g_rundir = g_topdir + "/run/" + g_case_name
         g_commondir = g_topdir + "/common/"
-        print "topdir: %s" % g_topdir
-        print "commondir: %s" % g_commondir
-        print "casedir: %s" % g_casedir
-        print "rundir: %s" % g_rundir
+
+        if g_debug_enabled:
+            print "topdir: %s" % g_topdir
+            print "commondir: %s" % g_commondir
+            print "casedir: %s" % g_casedir
+            print "rundir: %s" % g_rundir
 
         # 2. validate args
         if _validate_args() == False:
