@@ -13,28 +13,39 @@ function usage()
 }
 
 function runOneCase()
-{(
-    # 1. Enter case folder
+{
+    # 1. Enter case running folder
     local config="skull_ft_case.yml"
     local topdir=`pwd`
     local caseName=$1
-    local casedir="cases/$caseName"
+    local casedir="$topdir/cases/$caseName"
     local rundir=$topdir/run/$caseName
-    mkdir -p $rundir
+    local caseconf="$casedir/$config"
+    local logfile="$rundir/output.txt"
 
-    cd "$casedir"
-    echo "[$caseName] start"
+    if [ "$topdir" = "/" ]; then
+        echo "Error: case topdir is '/', move it to other folder"
+        return 1
+    fi
 
-    if [ ! -f "$config" ]; then
-        echo "Error: not found $config, skip this case"
+    if [ ! -f "$caseconf" ]; then
+        echo "Error: not found $caseconf, skip this case"
         return 0
     fi
 
-    # 2. Run Case
-    $bin_path/skull-case-executor.py -t $topdir -n $caseName -c $config
+    if [ -d "$rundir" ]; then
+        rm -rf "$rundir"
+    fi
+    mkdir -p "$rundir"
 
+    # 2. Run Case
+    echo "[$caseName] start"
+    (
+        cd "$rundir"
+        $bin_path/skull-case-executor.py -t $topdir -n $caseName -c $caseconf
+    ) > $logfile 2>&1;
     echo "[$caseName] end"
-)}
+}
 
 function runAllCases()
 {
@@ -86,12 +97,17 @@ fi
 
 # 2. Basic arg validation
 if [ -z "$case_path" ]; then
-    echo "case path is empty, cannot run case"
+    echo "Error: case path is empty, cannot run case"
     exit 1
 fi
 
 if [ ! -d "$case_path" ]; then
-    echo "case path ["$case_path"] is not a folder, cannot run case"
+    echo "Error: case path ["$case_path"] is not a folder, cannot run case"
+    exit 1
+fi
+
+if [ "$case_path" = "/" ]; then
+    echo "Error: case_path($case_path) is '/', cannot run the cases. Move it to other folder"
     exit 1
 fi
 
