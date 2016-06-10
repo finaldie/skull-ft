@@ -101,6 +101,9 @@ def _execute_commands(case_config, tab):
         action = str(action).replace(g_case_path_key, g_casedir)
         action = str(action).replace(g_run_path_key, g_rundir)
 
+        print "\n> %s" % action
+        sys.stdout.flush()
+
         # execute command
         ret = subprocess.call(action, shell=True)
         if ret != 0:
