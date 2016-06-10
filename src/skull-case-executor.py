@@ -30,9 +30,11 @@ def _load_yaml_config(config_name):
 
 def _create_case_config():
     return {
+        'description': "",
         'pre-run': [],
         'run': [],
-        'verify': []
+        'verify': [],
+        'post-verify': []
     }
 
 def _validate_args():
@@ -58,19 +60,29 @@ def _parse_config(cfg_name):
     case_config = _create_case_config()
 
     # 2.1 convert 'pre-run' section
-    pre_run_actions = cfg_yaml_obj['pre-run']
+    pre_run_actions = cfg_yaml_obj.get('pre-run')
     if not isinstance(pre_run_actions, list): raise Exception("Error: Tag [pre-run] is not a list")
     case_config['pre-run'] = pre_run_actions
 
     # 2.2 convert 'run' section
-    run_actions = cfg_yaml_obj['run']
+    run_actions = cfg_yaml_obj.get('run')
     if not isinstance(run_actions, list): raise Exception("Error: Tag [run] is not a list")
     case_config['run'] = run_actions
 
     # 2.3 convert 'verify' section
-    verify_actions = cfg_yaml_obj['verify']
+    verify_actions = cfg_yaml_obj.get('verify')
     if not isinstance(verify_actions, list): raise Exception("Error: Tag [verify] is not a list")
     case_config['verify'] = verify_actions
+
+    # 2.4 convert 'post-verify'
+    post_verify_actions = cfg_yaml_obj.get('post-verify')
+    if not isinstance(post_verify_actions, list): raise Exception("Error: Tag [post-verify] is not a list")
+    case_config['post-verify'] = post_verify_actions
+
+    # 2.5 convert description
+    desc = cfg_yaml_obj.get('description')
+    if not isinstance(desc, str): raise Exception("Error: Tag [description] is not a string")
+    case_config['description'] = desc
 
     return case_config
 
@@ -79,10 +91,9 @@ def _execute_commands(case_config, tab):
     global g_case_path_key
     global g_run_path_key
 
-    commands = case_config[tab]
-    if commands == None or isinstance(commands, list) == False:
-        print "Error: wrong tab(%s) which cannot be executed" % tab
-        raise Exception("Error: " + str(tab) + "'s command list is empty")
+    commands = case_config.get(tab)
+    if commands == None:
+        return
 
     for action in commands:
         # replace macros
@@ -96,12 +107,30 @@ def _execute_commands(case_config, tab):
             print "Error: command execute failed: %s" % action
             raise Exception("Error: command execute failed:" + str(action))
 
+def show_desc(case_config):
+    print "Description: %s" % case_config['description']
+
 def _execute_case_commands(case_config):
+    show_desc(case_config)
+
+    print "\n====================== Phase 'Pre-Run' ======================="
+    sys.stdout.flush()
     _execute_commands(case_config, "pre-run")
+
+    print "\n====================== Phase 'Run' ======================"
+    sys.stdout.flush()
     _execute_commands(case_config, "run")
+
+    print "\n====================== Phase 'Verify' ======================"
+    sys.stdout.flush()
     _execute_commands(case_config, "verify")
 
-    return True
+    print "\n====================== Phase 'Post-Verify' ======================"
+    sys.stdout.flush()
+    _execute_commands(case_config, "post-verify")
+
+    print "\n====================== Test Done ======================"
+    sys.stdout.flush()
 
 def _generate_report():
     return
