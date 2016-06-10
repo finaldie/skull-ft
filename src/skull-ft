@@ -39,12 +39,17 @@ function runOneCase()
     mkdir -p "$rundir"
 
     # 2. Run Case
-    echo "[$caseName] start"
+    echo -n "[$caseName] running ... "
     (
         cd "$rundir"
-        $bin_path/skull-case-executor.py -t $topdir -n $caseName -c $caseconf
+        $bin_path/skull-case-executor.py -t $topdir -n $caseName -c $caseconf || exit 1
     ) > $logfile 2>&1;
-    echo "[$caseName] end"
+
+    if [ $? -eq 0 ]; then
+        echo "OK"
+    else
+        echo "Failed! Check the log file $logfile for the details"
+    fi
 }
 
 function runAllCases()

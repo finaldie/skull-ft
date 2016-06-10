@@ -59,17 +59,17 @@ def _parse_config(cfg_name):
 
     # 2.1 convert 'pre-run' section
     pre_run_actions = cfg_yaml_obj['pre-run']
-    if not isinstance(pre_run_actions, list): raise
+    if not isinstance(pre_run_actions, list): raise Exception("Error: Tag [pre-run] is not a list")
     case_config['pre-run'] = pre_run_actions
 
     # 2.2 convert 'run' section
     run_actions = cfg_yaml_obj['run']
-    if not isinstance(run_actions, list): raise
+    if not isinstance(run_actions, list): raise Exception("Error: Tag [run] is not a list")
     case_config['run'] = run_actions
 
     # 2.3 convert 'verify' section
     verify_actions = cfg_yaml_obj['verify']
-    if not isinstance(verify_actions, list): raise
+    if not isinstance(verify_actions, list): raise Exception("Error: Tag [verify] is not a list")
     case_config['verify'] = verify_actions
 
     return case_config
@@ -82,7 +82,7 @@ def _execute_commands(case_config, tab):
     commands = case_config[tab]
     if commands == None or isinstance(commands, list) == False:
         print "Error: wrong tab(%s) which cannot be executed" % tab
-        raise
+        raise Exception("Error: " + str(tab) + "'s command list is empty")
 
     for action in commands:
         # replace macros
@@ -94,7 +94,7 @@ def _execute_commands(case_config, tab):
         ret = subprocess.call(action, shell=True)
         if ret != 0:
             print "Error: command execute failed: %s" % action
-            raise
+            raise Exception("Error: command execute failed:" + str(action))
 
 def _execute_case_commands(case_config):
     _execute_commands(case_config, "pre-run")
@@ -143,7 +143,7 @@ if __name__ == "__main__":
         if _validate_args() == False:
             print "Error: Parameters validation failed"
             usage
-            raise
+            raise Exception("Error: Parameters validation failed")
 
         # 3. parse the config
         ft_config = _parse_config(g_config_name)
@@ -156,5 +156,4 @@ if __name__ == "__main__":
 
     except Exception, e:
         print "Fatal: " + str(e)
-        usage()
         raise
