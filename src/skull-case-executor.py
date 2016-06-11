@@ -23,6 +23,8 @@ g_common_path_key = "${COMMON}"
 g_case_path_key = "${CASE}"
 g_run_path_key = "${RUN}"
 
+g_exception_occurred = False
+
 def _load_yaml_config(config_name):
     yaml_file = file(config_name, 'r')
     yml_obj = yaml.load(yaml_file)
@@ -105,28 +107,35 @@ def _execute_commands(case_config, tab):
         sys.stdout.flush()
 
         # execute command
-        ret = subprocess.call(action, shell=True)
-        if ret != 0:
-            print "Error: command execute failed: %s" % action
-            raise Exception("Error: command execute failed:" + str(action))
+        output = subprocess.check_output(action, shell=True)
+        print "%s" % output
+        sys.stdout.flush()
 
 def show_desc(case_config):
     print "Description: %s" % case_config['description']
 
 def _execute_case_commands(case_config):
+    global g_exception_occurred
     show_desc(case_config)
 
-    print "\n====================== Phase 'Pre-Run' ======================="
-    sys.stdout.flush()
-    _execute_commands(case_config, "pre-run")
+    try:
+        print "\n====================== Phase 'Pre-Run' ======================="
+        sys.stdout.flush()
+        _execute_commands(case_config, "pre-run")
 
-    print "\n====================== Phase 'Run' ======================"
-    sys.stdout.flush()
-    _execute_commands(case_config, "run")
+        print "\n====================== Phase 'Run' ======================"
+        sys.stdout.flush()
+        _execute_commands(case_config, "run")
 
-    print "\n====================== Phase 'Verify' ======================"
-    sys.stdout.flush()
-    _execute_commands(case_config, "verify")
+        print "\n====================== Phase 'Verify' ======================"
+        sys.stdout.flush()
+        _execute_commands(case_config, "verify")
+    except subprocess.CalledProcessError, e:
+        print "Fatal: returnCode: %d, errors: %s" % (e.returncode, str(e))
+        g_exception_occurred = True
+    except Exception, e:
+        print "Fatal: " + str(e)
+        g_exception_occurred = True
 
     print "\n====================== Phase 'Post-Verify' ======================"
     sys.stdout.flush()
@@ -185,6 +194,10 @@ if __name__ == "__main__":
 
         # 5. generate a report
         _generate_report()
+
+        # 6. Decide return code
+        if g_exception_occurred:
+            sys.exit(1)
 
     except Exception, e:
         print "Fatal: " + str(e)
