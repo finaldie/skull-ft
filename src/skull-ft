@@ -5,11 +5,13 @@ case_path=""
 case_name=""
 bin_path=""
 
+debug_mode=false
+
 # ============= Internal Functions ==============
 function usage()
 {
     echo "Usage:"
-    echo " - skull-ft case_path [case_name]"
+    echo " - skull-ft -p case_path [-n case_name] [-D]"
 }
 
 function runOneCase()
@@ -49,6 +51,12 @@ function runOneCase()
         echo "OK"
     else
         echo "Failed! Check the log file $logfile for the details"
+
+        if $debug_mode; then
+            echo ">>>>>>>>>>>>>>>>>> Diagnosis for $caseName >>>>>>>>>>>>>>>>>>"
+            cat $logfile
+            echo ">>>>>>>>>>>>>>>>>> Diagnosis for $caseName End >>>>>>>>>>>>>>>>>>"
+        fi
     fi
 }
 
@@ -90,8 +98,29 @@ if [ $# = 0 ]; then
     exit 1
 fi
 
-case_path=$1
-case_name=$2
+while true; do
+    case "$1" in
+        (-p)
+            case_path=$2
+            shift 2
+            ;;
+        (-n)
+            case_name=$2
+            shift 2
+            ;;
+        (-D)
+            debug_mode=true
+            shift
+            ;;
+        (*)
+            break
+            ;;
+    esac
+done
+
+# Export this var to subshells
+export debug_mode
+echo "Debug mode: $debug_mode"
 
 if [ ! -z "$SKULLFT_BINPATH" ]; then
     bin_path="$SKULLFT_BINPATH"
