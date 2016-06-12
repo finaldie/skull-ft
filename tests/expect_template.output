@@ -1,14 +1,44 @@
+Description: Example test case
+
+====================== Phase 'Pre-Run' =======================
+> echo "pre-run"
 pre-run
+
+> echo "pre-run successful"
 pre-run successful
+
+> ${prefix}/tests/common//test_echo.sh
 common test echo
+
+
+====================== Phase 'Run' ======================
+> echo "run"
 run
+
+> echo "run successful"
 run successful
+
+> echo "${prefix}/tests/common/ run successful"
 ${prefix}/tests/common/ run successful
+
+> echo "${prefix}/tests/cases/case1 run successful"
 ${prefix}/tests/cases/case1 run successful
+
+> echo "${prefix}/tests/run/case1 run successful"
 ${prefix}/tests/run/case1 run successful
+
+
+====================== Phase 'Verify' ======================
+> echo "verify"
 verify
+
+> echo "verify successful"
 verify successful
-topdir: ${prefix}/tests
-commondir: ${prefix}/tests/common/
-casedir: ${prefix}/tests/cases/case1
-rundir: ${prefix}/tests/run/case1
+
+
+====================== Phase 'Post-Verify' ======================
+> echo "post-verify"
+post-verify
+
+
+====================== Test Done ======================

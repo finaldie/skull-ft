@@ -1,3 +1,5 @@
+description: Example test case
+
 pre-run:
     - echo "pre-run"
     - echo "pre-run successful"
@@ -13,3 +15,6 @@ run:
 verify:
     - echo "verify"
     - echo "verify successful"
+
+post-verify:
+    - echo "post-verify"

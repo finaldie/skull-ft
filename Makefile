@@ -10,7 +10,7 @@ SKULLFT_BINPATH=$(topdir)/src
 export SKULLFT_BINPATH
 
 check:
-	./src/skull-ft ./tests
+	./src/skull-ft -p ./tests
 	cd tests && sed 's|$${prefix}|$(topdir)|g' $(EXPECT_OUTPUT_TEMPLATE) > $(EXPECT_OUTPUT_FILE)
 	diff -u $(EXPECT_OUTPUT_FILE) $(TEST_OUTPUT_FILE) && echo "Test Done"
 
