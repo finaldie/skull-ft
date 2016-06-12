@@ -42,15 +42,21 @@ function runOneCase()
 
     # 2. Run Case
     echo -n "[$caseName] running ... "
+    local start_time=`date +%s`
     (
         cd "$rundir"
         $bin_path/skull-case-executor.py -t $topdir -n $caseName -c $caseconf || exit 1
     ) > $logfile 2>&1;
 
-    if [ $? -eq 0 ]; then
-        echo "OK"
+    # 3. Generate result
+    local ret=$?
+    local end_time=`date +%s`
+    local duration=$((end_time - start_time))
+
+    if [ $ret -eq 0 ]; then
+        echo "OK ${duration}s"
     else
-        echo "Failed! Check the log file $logfile for the details"
+        echo "Failed! ${duration}s Check the log file $logfile for the details"
 
         if $debug_mode; then
             echo ">>>>>>>>>>>>>>>>>> Diagnosis for $caseName >>>>>>>>>>>>>>>>>>"
@@ -62,7 +68,9 @@ function runOneCase()
 
 function runAllCases()
 {
-    ls -1 "cases" | while read caseName; do
+    local cases=(`ls -1 "cases"`)
+
+    for caseName in "${cases[@]}"; do
         if [ -z "$caseName" ]; then
             echo "'case name' is empty, skip it"
             continue
@@ -79,6 +87,8 @@ function runAllCases()
 
 function runCases()
 {
+    local start_time=`date +%s`
+
     # 1. Enter case path
     cd "$case_path"
 
@@ -88,6 +98,11 @@ function runCases()
     else
         runOneCase "$case_name"
     fi
+
+    local end_time=`date +%s`
+    local duration=$((end_time - start_time))
+    echo "----"
+    echo "Test Done. Totally ${duration}s"
 }
 
 # ============= main ==============
@@ -120,7 +135,6 @@ done
 
 # Export this var to subshells
 export debug_mode
-echo "Debug mode: $debug_mode"
 
 if [ ! -z "$SKULLFT_BINPATH" ]; then
     bin_path="$SKULLFT_BINPATH"
