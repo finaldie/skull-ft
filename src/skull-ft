@@ -7,6 +7,10 @@ bin_path=""
 
 debug_mode=false
 
+passed_cases=0
+failed_cases=0
+total_cases=0
+
 # ============= Internal Functions ==============
 function usage()
 {
@@ -41,7 +45,7 @@ function runOneCase()
     mkdir -p "$rundir"
 
     # 2. Run Case
-    echo -n "[$caseName] running ... "
+    printf "Run case [%-20s] ... " $caseName
     local start_time=`date +%s`
     (
         cd "$rundir"
@@ -52,10 +56,13 @@ function runOneCase()
     local ret=$?
     local end_time=`date +%s`
     local duration=$((end_time - start_time))
+    total_cases=$((total_cases + 1))
 
     if [ $ret -eq 0 ]; then
+        passed_cases=$((passed_cases + 1))
         echo "OK ${duration}s"
     else
+        failed_cases=$((failed_cases + 1))
         echo "Failed! ${duration}s Check the log file $logfile for the details"
 
         if $debug_mode; then
@@ -99,10 +106,13 @@ function runCases()
         runOneCase "$case_name"
     fi
 
+    # 3. Generate a report
     local end_time=`date +%s`
     local duration=$((end_time - start_time))
     echo "----"
     echo "Test Done. Totally ${duration}s"
+
+    echo "Passed/Total: ${passed_cases}/${total_cases} Failed: $failed_cases"
 }
 
 # ============= main ==============
