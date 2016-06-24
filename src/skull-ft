@@ -6,6 +6,7 @@ case_name=""
 bin_path=""
 
 debug_mode=false
+title_length=20
 
 passed_cases=0
 failed_cases=0
@@ -45,7 +46,7 @@ function runOneCase()
     mkdir -p "$rundir"
 
     # 2. Run Case
-    printf "Run case [%-20s] ... " $caseName
+    printf "Run case [%-${title_length}s] ... " $caseName
     local start_time=`date +%s`
     (
         cd "$rundir"
@@ -118,7 +119,20 @@ function runCases()
     fi
 }
 
+function signal_handler()
+{
+    local ret=$1
+    subjobs=`jobs -l | awk '{print $2}'`
+    if [ ! -z "$subjobs" ]; then
+        echo "$subjobs" | xargs kill
+    fi
+
+    exit $ret
+}
+
 # ============= main ==============
+trap signal_handler SIGHUP SIGINT SIGTERM
+
 # 1. Check args
 if [ $# = 0 ]; then
     echo "Missing 'case path' arg"
@@ -139,6 +153,10 @@ while true; do
         (-D)
             debug_mode=true
             shift
+            ;;
+        (-l)
+            title_length=$2
+            shift 2
             ;;
         (*)
             break
