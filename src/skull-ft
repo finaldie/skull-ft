@@ -7,16 +7,32 @@ bin_path=""
 
 debug_mode=false
 title_length=20
+skip_arg=""
+skip_list=()
 
 passed_cases=0
 failed_cases=0
 total_cases=0
+skipped_cases=0
 
 # ============= Internal Functions ==============
 function usage()
 {
     echo "Usage:"
-    echo " - skull-ft -p case_path [-n case_name] [-D]"
+    echo " - skull-ft -p case_path [-n case_name] [-l title_length] [-D] [--skip case[,case2]]"
+}
+
+function should_skip()
+{
+    local caseName=$1
+
+    for c in ${skip_list[@]}; do
+        if [ "$c" = "$caseName" ]; then
+            return 0
+        fi
+    done
+
+    return 1
 }
 
 function runOneCase()
@@ -37,6 +53,12 @@ function runOneCase()
 
     if [ ! -f "$caseconf" ]; then
         echo "Error: not found $caseconf, skip this case"
+        return 0
+    fi
+
+    if $(should_skip $caseName); then
+        printf "Run case [%-${title_length}s] ... Skipped\n" $caseName
+        skipped_cases=$((skipped_cases + 1))
         return 0
     fi
 
@@ -112,7 +134,7 @@ function runCases()
     local duration=$((end_time - start_time))
     echo "----"
     echo "Test Done. Totally ${duration}s"
-    echo "Passed/Total: ${passed_cases}/${total_cases} Failed: $failed_cases"
+    echo "Passed/Total: ${passed_cases}/${total_cases} Failed: $failed_cases Skipped: $skipped_cases"
 
     if [ $failed_cases -gt 0 ]; then
         return 1
@@ -158,6 +180,10 @@ while true; do
             title_length=$2
             shift 2
             ;;
+        (--skip)
+            skip_arg=$2
+            shift 2
+            ;;
         (*)
             break
             ;;
@@ -188,6 +214,14 @@ fi
 if [ "$case_path" = "/" ]; then
     echo "Error: case_path($case_path) is '/', cannot run the cases. Move it to other folder"
     exit 1
+fi
+
+if [ ! -z "$skip_arg" ]; then
+    IFS=',' read -r -a skip_list <<< "$skip_arg"
+
+    if $debug_mode; then
+        echo "Skip case list: $skip_arg"
+    fi
 fi
 
 # 3. Run Cases
