@@ -107,9 +107,12 @@ def _execute_commands(case_config, tab):
         sys.stdout.flush()
 
         # execute command
-        output = subprocess.check_output(action, shell=True)
-        print "%s" % output
-        sys.stdout.flush()
+        if hasattr(subprocess, 'check_output'):
+            output = subprocess.check_output(action, shell=True)
+            print "%s" % output
+            sys.stdout.flush()
+        else:
+            subprocess.check_call(action, shell=True)
 
 def show_desc(case_config):
     print "Description: %s" % case_config['description']
