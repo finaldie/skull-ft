@@ -54,6 +54,12 @@ def _validate_args():
 
     return True
 
+def _isvalid(actions):
+    if actions == None or not isinstance(actions, list) or not isinstance(actions, str) :
+        return True
+    else:
+        return False
+
 def _parse_config(cfg_name):
     # 1. Load config
     cfg_yaml_obj = _load_yaml_config(cfg_name)
@@ -63,22 +69,22 @@ def _parse_config(cfg_name):
 
     # 2.1 convert 'pre-run' section
     pre_run_actions = cfg_yaml_obj.get('pre-run')
-    if not isinstance(pre_run_actions, list): raise Exception("Error: Tag [pre-run] is not a list")
+    if not _isvalid(pre_run_actions): raise Exception("Error: Tag [pre-run] is not a valid type")
     case_config['pre-run'] = pre_run_actions
 
     # 2.2 convert 'run' section
     run_actions = cfg_yaml_obj.get('run')
-    if not isinstance(run_actions, list): raise Exception("Error: Tag [run] is not a list")
+    if not _isvalid(run_actions): raise Exception("Error: Tag [run] is not a valid type")
     case_config['run'] = run_actions
 
     # 2.3 convert 'verify' section
     verify_actions = cfg_yaml_obj.get('verify')
-    if not isinstance(verify_actions, list): raise Exception("Error: Tag [verify] is not a list")
+    if not _isvalid(verify_actions): raise Exception("Error: Tag [verify] is not a valid type")
     case_config['verify'] = verify_actions
 
     # 2.4 convert 'post-verify'
     post_verify_actions = cfg_yaml_obj.get('post-verify')
-    if not isinstance(post_verify_actions, list): raise Exception("Error: Tag [post-verify] is not a list")
+    if not _isvalid(post_verify_actions) : raise Exception("Error: Tag [post-verify] is not a valid type")
     case_config['post-verify'] = post_verify_actions
 
     # 2.5 convert description
@@ -88,31 +94,39 @@ def _parse_config(cfg_name):
 
     return case_config
 
-def _execute_commands(case_config, tab):
+def _execute_command(action):
     global g_common_path_key
     global g_case_path_key
     global g_run_path_key
 
+    # replace macros
+    action = str(action).replace(g_common_path_key, g_commondir)
+    action = str(action).replace(g_case_path_key, g_casedir)
+    action = str(action).replace(g_run_path_key, g_rundir)
+
+    print "> %s" % action
+    sys.stdout.flush()
+
+    # execute command
+    if hasattr(subprocess, 'check_output'):
+        output = subprocess.check_output(action, shell=True)
+        print "%s" % output
+        sys.stdout.flush()
+    else:
+        subprocess.check_call(action, shell=True)
+
+def _execute_commands(case_config, tab):
     commands = case_config.get(tab)
     if commands == None:
         return
 
-    for action in commands:
-        # replace macros
-        action = str(action).replace(g_common_path_key, g_commondir)
-        action = str(action).replace(g_case_path_key, g_casedir)
-        action = str(action).replace(g_run_path_key, g_rundir)
-
-        print "> %s" % action
-        sys.stdout.flush()
-
-        # execute command
-        if hasattr(subprocess, 'check_output'):
-            output = subprocess.check_output(action, shell=True)
-            print "%s" % output
-            sys.stdout.flush()
-        else:
-            subprocess.check_call(action, shell=True)
+    if isinstance(commands, list):
+        for action in commands:
+            _execute_command(action)
+    elif isinstance(commands, str):
+        _execute_command(commands)
+    else:
+        raise Exception("Error: Unknown type of commands (%s)" % type(commands))
 
 def show_desc(case_config):
     print "Description: %s" % case_config['description']
