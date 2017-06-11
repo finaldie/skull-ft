@@ -2,7 +2,8 @@
 
 # Global Variables
 case_path=""
-case_name=""
+case_arg=""
+case_list=()
 bin_path=""
 
 debug_mode=false
@@ -19,7 +20,7 @@ skipped_cases=0
 function usage()
 {
     echo "Usage:"
-    echo " - skull-ft -p case_path [-n case_name] [-l title_length] [-D] [--skip case[,case2]]"
+    echo " - skull-ft -p case_path [-n case[,case2]] [-l title_length] [-D] [--skip case[,case2]]"
 }
 
 function should_skip()
@@ -98,7 +99,7 @@ function runOneCase()
 
 function runAllCases()
 {
-    local cases=(`ls -1 "cases"`)
+    local cases=($1)
 
     for caseName in "${cases[@]}"; do
         if [ -z "$caseName" ]; then
@@ -123,11 +124,17 @@ function runCases()
     cd "$case_path"
 
     # 2. Run all cases or one case
-    if [ -z "$case_name" ]; then
-        runAllCases
+    if [ ! -z "$case_arg" ]; then
+        IFS=',' read -r -a case_list <<< "$case_arg"
+
+        if $debug_mode; then
+            echo "Case list: $case_arg"
+        fi
     else
-        runOneCase "$case_name"
+        case_list=(`ls -1 "cases"`)
     fi
+
+    runAllCases $case_list
 
     # 3. Generate a report
     local end_time=`date +%s`
@@ -169,7 +176,7 @@ while true; do
             shift 2
             ;;
         (-n)
-            case_name=$2
+            case_arg=$2
             shift 2
             ;;
         (-D)
