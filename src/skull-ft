@@ -99,7 +99,7 @@ function runOneCase()
 
 function runAllCases()
 {
-    local cases=($1)
+    local cases=($@)
 
     for caseName in "${cases[@]}"; do
         if [ -z "$caseName" ]; then
@@ -126,15 +126,15 @@ function runCases()
     # 2. Run all cases or one case
     if [ ! -z "$case_arg" ]; then
         IFS=',' read -r -a case_list <<< "$case_arg"
-
-        if $debug_mode; then
-            echo "Case list: $case_arg"
-        fi
     else
         case_list=(`ls -1 "cases"`)
     fi
 
-    runAllCases $case_list
+    if $debug_mode; then
+        echo "Case list: ${case_list[@]}"
+    fi
+
+    runAllCases ${case_list[@]}
 
     # 3. Generate a report
     local end_time=`date +%s`
