@@ -226,9 +226,7 @@ fi
 if [ ! -z "$skip_arg" ]; then
     IFS=',' read -r -a skip_list <<< "$skip_arg"
 
-    if $debug_mode; then
-        echo "Skip case list: $skip_arg"
-    fi
+    echo "Skip list: $skip_arg"
 fi
 
 # 3. Run Cases
