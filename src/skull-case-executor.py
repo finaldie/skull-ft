@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import sys
 import os
@@ -26,7 +26,7 @@ g_run_path_key = "${RUN}"
 g_exception_occurred = False
 
 def _load_yaml_config(config_name):
-    yaml_file = file(config_name, 'r')
+    yaml_file = open(config_name, 'r')
     yml_obj = yaml.load(yaml_file)
     return yml_obj
 
@@ -41,15 +41,15 @@ def _create_case_config():
 
 def _validate_args():
     if g_config_name == "":
-        print "Error: config name is empty"
+        print ("Error: config name is empty")
         return False
 
     if g_case_name == "":
-        print "Error: case name is empty"
+        print ("Error: case name is empty")
         return False
 
     if g_topdir == "":
-        print "Error: topdir is empty"
+        print ("Error: topdir is empty")
         return False
 
     return True
@@ -104,13 +104,13 @@ def _execute_command(action):
     action = str(action).replace(g_case_path_key, g_casedir)
     action = str(action).replace(g_run_path_key, g_rundir)
 
-    print "> %s" % action
+    print ("> %s" % action)
     sys.stdout.flush()
 
     # execute command
     if hasattr(subprocess, 'check_output'):
         output = subprocess.check_output(action, shell=True)
-        print "%s" % output
+        print ("%s" % output)
         sys.stdout.flush()
     else:
         subprocess.check_call(action, shell=True)
@@ -129,44 +129,44 @@ def _execute_commands(case_config, tab):
         raise Exception("Error: Unknown type of commands (%s)" % type(commands))
 
 def show_desc(case_config):
-    print "Description: %s" % case_config['description']
+    print ("Description: %s" % case_config['description'])
 
 def _execute_case_commands(case_config):
     global g_exception_occurred
     show_desc(case_config)
 
     try:
-        print "\n====================== Phase 'Pre-Run' ======================="
+        print ("\n====================== Phase 'Pre-Run' =======================")
         sys.stdout.flush()
         _execute_commands(case_config, "pre-run")
 
-        print "\n====================== Phase 'Run' ======================"
+        print ("\n====================== Phase 'Run' ======================")
         sys.stdout.flush()
         _execute_commands(case_config, "run")
 
-        print "\n====================== Phase 'Verify' ======================"
+        print ("\n====================== Phase 'Verify' ======================")
         sys.stdout.flush()
         _execute_commands(case_config, "verify")
-    except subprocess.CalledProcessError, e:
-        print "Fatal: returnCode: %d, errors: %s" % (e.returncode, str(e))
+    except subprocess.CalledProcessError as e:
+        print ("Fatal: returnCode: %d, errors: %s" % (e.returncode, str(e)))
         g_exception_occurred = True
-    except Exception, e:
-        print "Fatal: " + str(e)
+    except Exception as e:
+        print ("Fatal: " + str(e))
         g_exception_occurred = True
 
-    print "\n====================== Phase 'Post-Verify' ======================"
+    print ("\n====================== Phase 'Post-Verify' ======================")
     sys.stdout.flush()
     _execute_commands(case_config, "post-verify")
 
-    print "\n====================== Test Done ======================"
+    print ("\n====================== Test Done ======================")
     sys.stdout.flush()
 
 def _generate_report():
     return
 
 def usage():
-    print "usage:"
-    print "  ft-executor.py -c $config -t $topdir -n $caseName"
+    print ("usage:")
+    print ("  skull-case-executor.py -c $config -t $topdir -n $caseName")
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
@@ -192,14 +192,14 @@ if __name__ == "__main__":
         g_commondir = g_topdir + "/common/"
 
         if g_debug_enabled:
-            print "topdir: %s" % g_topdir
-            print "commondir: %s" % g_commondir
-            print "casedir: %s" % g_casedir
-            print "rundir: %s" % g_rundir
+            print ("topdir: %s" % g_topdir)
+            print ("commondir: %s" % g_commondir)
+            print ("casedir: %s" % g_casedir)
+            print ("rundir: %s" % g_rundir)
 
         # 2. validate args
         if _validate_args() == False:
-            print "Error: Parameters validation failed"
+            print ("Error: Parameters validation failed")
             usage
             raise Exception("Error: Parameters validation failed")
 
@@ -216,6 +216,6 @@ if __name__ == "__main__":
         if g_exception_occurred:
             sys.exit(1)
 
-    except Exception, e:
-        print "Fatal: " + str(e)
+    except Exception as e:
+        print ("Fatal: " + str(e))
         raise

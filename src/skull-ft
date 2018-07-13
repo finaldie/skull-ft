@@ -16,6 +16,8 @@ failed_cases=0
 total_cases=0
 skipped_cases=0
 
+python_path=${python_path:-/usr/bin/python3}
+
 # ============= Internal Functions ==============
 function usage()
 {
@@ -73,7 +75,7 @@ function runOneCase()
     local start_time=`date +%s`
     (
         cd "$rundir"
-        $bin_path/skull-case-executor.py -t $topdir -n $caseName -c $caseconf || exit 1
+        $python_path $bin_path/skull-case-executor.py -t $topdir -n $caseName -c $caseconf || exit 1
     ) > $logfile 2>&1;
 
     # 3. Generate result
