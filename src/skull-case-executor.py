@@ -110,7 +110,7 @@ def _execute_command(action):
     # execute command
     if hasattr(subprocess, 'check_output'):
         output = subprocess.check_output(action, shell=True)
-        print ("%s" % output)
+        print ("%s" % output.decode('UTF-8'))
         sys.stdout.flush()
     else:
         subprocess.check_call(action, shell=True)
