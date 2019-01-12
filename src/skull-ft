@@ -76,7 +76,7 @@ function runOneCase()
     (
         cd "$rundir"
         $python_path $bin_path/skull-case-executor.py -t $topdir -n $caseName -c $caseconf || exit 1
-    ) > $logfile 2>&1;
+    ) 2>&1 | tee -a $logfile ;
 
     # 3. Generate result
     local ret=$?
